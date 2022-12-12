@@ -45,7 +45,7 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
     }
 
     ofstream output;
-    output.open(output_path, std::ios::out | std::ios::app); //以写入和在文件末尾添加的方式打开.txt文件，没有的话就创建该文件。
+    output.open(output_path, std::ios::out | std::ios::trunc); //如果文件存在，将其清零，没有的话就创建该文件。
     if (!output.is_open())
     {
         std::cout<< "can not create ouput file, please check the output path"<<std::endl;
@@ -84,7 +84,13 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
     {
         // 如果 i 是序列末尾，则跳过它
         if (SaRank[i] == n-1)
+        {
+            LCP[SaRank[i]] = 0;
+            LCP_tmp[SaRank[i]].first = 0;
+            LCP_tmp[SaRank[i]].second = SaRank[i];
             continue;
+        }
+            
     
         // 如果 k 不为 0，则减去 1
         if (k)
@@ -99,17 +105,15 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
         LCP_tmp[SaRank[i]].first = k;
         LCP_tmp[SaRank[i]].second = SaRank[i];
     }
-    
 
      // 构建 n 个节点的二叉树
     TreeNode* S = buildTree(n, 0, LCP, ml); 
     // 设置内部节点的inS属性
     setInS(S);
 
-    // find_index(S, n, n-1);
-
     std::sort(LCP_tmp.begin(), LCP_tmp.end(), compareByFirst); // 论文中的I数组
-    unsigned int t, pi, ni;
+    unsigned int t, pi, ni, res_count;
+    res_count = 0; // 统计公共子串个数
 
     // 论文中的算法1
     for (t = 0; t < n; t++) 
@@ -121,12 +125,14 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
         pi = max_lessthan(S, n, i) + 1;
         ni = min_morethan(S, n, i);
         set_target_inS(S, n, i);
+        
         if((pi==1 || LCP[pi-1]!=LCP[i])&&(ni==n || LCP[ni]!= LCP[i]))
         {
             if(Sa[pi]==0 || Sa[ni]==0 || seq[Sa[pi]-1] != seq[Sa[ni]-1] || labs(SaRank[Sa[ni]-1]-SaRank[Sa[pi]-1]) != ni - pi)
             {
                 // 此时我们找到了ni-pi+1个长度为LCP[i]的公共子串，他们在seqence上的位置是Sa[m], pi<=m<=ni
                 unsigned int wide = LCP[i];
+                res_count++;
                 output << std::to_string(wide) << std::endl;
                 for(unsigned int k = pi; k<=ni; k++)
                 {
@@ -136,6 +142,10 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
             }
         }
     }
+    std::cout<< "The total result number is " << std::to_string(res_count) << std::endl;
 
     output.close(); // 关闭文件
+    delete Sa;
+    delete SaRank;
+    delete LCP;
 }
