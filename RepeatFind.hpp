@@ -11,12 +11,6 @@
 #include <istream>
 #include <algorithm>
 #include <vector>
-/*
-本文件是对论文Efficient computation of all perfect repeats in genomic sequences of 
-up to half a gigabyte, with a case study on the human genome的复现
-Becher, Verónica et al. “Efficient computation of all perfect repeats in genomic sequences of up to half a gigabyte, 
-with a case study on the human genome.” Bioinformatics (Oxford, England) vol. 25,14 (2009): 1746-53. doi:10.1093/bioinformatics/btp321
-*/
 
 // 比较函数，指定按照pair的first元素进行比较
 bool compareByFirst(const std::pair<unsigned int, unsigned int>& a, const std::pair<unsigned int, unsigned int>& b) {   
@@ -28,10 +22,14 @@ bool compareByFirst(const std::pair<unsigned int, unsigned int>& a, const std::p
 @param: seq: 输入的拼接数据，末尾必须是0，论文中的w
         ml：min_length, 寻找的repeat的最小长度
 
-本函数是基于后缀数组的repeat寻找算法
+本函数是对论文Efficient computation of all perfect repeats in genomic sequences of 
+up to half a gigabyte, with a case study on the human genome的复现
+Becher, Verónica et al. “Efficient computation of all perfect repeats in genomic sequences of up to half a gigabyte, 
+with a case study on the human genome.” Bioinformatics (Oxford, England) vol. 25,14 (2009): 1746-53. doi:10.1093/bioinformatics/btp321
 */
-void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
+void RepeatFind1(std::string seq, unsigned int ml, std::string output_path)
 {
+    size_t memory = 0; // 使用的内存大小
     if(seq[seq.size()-1] != '0') // 判断是否0结尾
     {
         std::cout<< "The merged data should end with 0, please check your input"<<std::endl;
@@ -58,8 +56,14 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
     clock_t start, end;
     start = clock(); // 开始时间戳
     unsigned int n = seq.size(); // 输入序列的长度
+
+    memory += sizeof(char) * n;
+    std::cout << "The seqence size is " << memory / pow(2, 20) << " MB" << std::endl;
+
     unsigned char * s_ch = (unsigned char *)seq.c_str();  // 输入的数据
     unsigned int * Sa = new unsigned int[n]; // 论文中的r，构建的后缀数组，Sa[i]代表第i个后缀在seq中的位置
+    
+
     SACA_K(s_ch, Sa, n, 256, n, 0);
     end = clock();                                                                                       // 结束时间戳
     std::cout << "Sort SA time consume: " << (double)(end - start) / CLOCKS_PER_SEC << "s" << std::endl; // 耗费的时间
@@ -67,6 +71,8 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
 
     start = clock();
     unsigned int * SaRank = new unsigned int[n];  //论文中的p，SA的逆序数组，SaRank[i]代表seq第i个字符对应后缀数组中的位置
+    memory += n * (2 * sizeof(unsigned int)); // SA, SaRank占用大小
+
     for(i = 0; i < n; i++)
         SaRank[Sa[i]] = i;
 
@@ -74,6 +80,7 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
     std::vector<std::pair<unsigned int, unsigned int>> LCP_tmp;
     LCP_tmp.resize(n);
     unsigned int * LCP = new unsigned int[n]; // LCP数组，LCP[i]代表第i个后缀和第i+1个后缀的公共前缀长度
+    memory += n * (sizeof(unsigned int) + sizeof(std::pair<unsigned int, unsigned int>)); // LCP和LCP_tmp
    
     // n 是 seq 的长度
     // Sa 是排名为 i 的后缀的位置
@@ -110,6 +117,7 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
     TreeNode* S = buildTree(n, 0, LCP, ml); 
     // 设置内部节点的inS属性
     setInS(S);
+    memory += 2 * n * sizeof(TreeNode); 
 
     std::sort(LCP_tmp.begin(), LCP_tmp.end(), compareByFirst); // 论文中的I数组
     unsigned int t, pi, ni, res_count;
@@ -143,9 +151,16 @@ void RepeatFind(std::string seq, unsigned int ml, std::string output_path)
         }
     }
     std::cout<< "The total result number is " << std::to_string(res_count) << std::endl;
+    std::cout << "The total used memory is " << memory / pow(2, 20) << " MB" << std::endl;
+    /*
+    大部分内存都耗在了二叉树那里，大约占据了80%的内存，
+    等以后有时间了优化一下，结构体的内存对齐耗费太大了
+    */
+    
 
     output.close(); // 关闭文件
     delete Sa;
     delete SaRank;
     delete LCP;
 }
+
