@@ -4,12 +4,6 @@
 #include <fstream>
 #include <istream>
 
-//---------------------------------------
-struct node // 用于求取数组I
-{
-    unsigned int index;
-    unsigned int value;
-};
 
 //-----------------------------------------
 // 定义二叉树的节点结构

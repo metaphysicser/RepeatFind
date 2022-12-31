@@ -1,10 +1,12 @@
 # RepeatFind
 
-本项目是对论文"Efficient computation of all perfect repeats in genomic sequences of up to half a gigabyte, with a case study on the human genome"的复现，主要功能是对输入序列中重复片段的寻找。
+本项目是对论文"Efficient computation of all perfect repeats in genomic sequences of up to half a gigabyte, with a case study on the human genome"和"Space-Efficient Computation of Maximal and Supermaximal Repeats in Genome Sequences"的复现，主要功能是对输入序列中重复片段的寻找。
 
 ## 使用方法
 
 核心函数为"RepeatFind.hpp"文件中的void RepeatFind(std::string seq, unsigned int ml, std::string output_path)函数
+
+(有两个函数，分别是RepeatFind1和RepeatFind2，是对两篇论文的复现，运行结果是一致的)
 
 - seq: string类型，是输入的序列，其末尾必须以"0"结尾
 - ml: unsigned int类型，是重复片段的最短长度，至少要大于0
@@ -26,7 +28,7 @@
 
 ---
 
-当然也可以直接调用test.cpp文件，方便快捷的处理fasta文件
+当然也可以直接调用test.cpp文件，方便快捷的处理fasta文件，或者随机生成数据
 
 首先编译test.cpp文件
 
@@ -42,8 +44,10 @@ g++ test.cpp -o test
 
 如果是window系统，命令中的./test 应当更换为./test.exe
 
-test文件接受两个参数，输入文件的路径和输出文件的路径。目前输入文件只支持fasta格式，会自动将所有序列拼接起来，用"0"作为分隔符，然后输入进RepeatFind函数。ml参数也就是最小阈值需要在test文件中手动修改。
+test文件接受两个参数，输入文件的路径和输出文件的路径。目前输入文件只支持fasta格式，会自动将所有序列拼接起来，用"0"作为分隔符，然后输入进RepeatFind函数。ml参数也就是最小阈值需要在test文件中手动修改。test文件里面还有一部分用于随机生成数据，所以要自行对test文件进行更改。
 
 ## 引用论文
 
 > Verónica Becher, Alejandro Deymonnaz, Pablo Heiber, Efficient computation of all perfect repeats in genomic sequences of up to half a gigabyte, with a case study on the human genome, *Bioinformatics*, Volume 25, Issue 14, 15 July 2009, Pages 1746–1753, https://doi.org/10.1093/bioinformatics/btp321
+
+> Beller, Timo, Katharina Berger, and Enno Ohlebusch. "Space-efficient computation of maximal and supermaximal repeats in genome sequences." *International Symposium on String Processing and Information Retrieval*. Springer, Berlin, Heidelberg, 2012.

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <algorithm>
 
+
 // argc是参数个数
 // arcv是具体参数，argv[0]是可执行exe文件的路径，argv[1]是输入文件的路径
 int main(int argc, char *argv[])
@@ -42,6 +43,7 @@ int main(int argc, char *argv[])
         return 0;                                               // 退出程序
     }
     std::cout<< "The seqence number is "<< k << std::endl;
+
     
     std::string merged_data = "";
     // 拼接序列
@@ -53,10 +55,20 @@ int main(int argc, char *argv[])
 
     // 输入的序列确保以 0 作为结尾
     start = clock();
+    // 这里是随机生成碱基，可以注释掉
+    merged_data = "";
+    char m[] = {'A', 'G','C','T','0'};
+    for(int i = 0; i < 10000000; i++)
+    {
+        merged_data+=m[rand() % 4];
+    }
+        
+    merged_data.append("0");
 
-    unsigned int ml = 2000;
-   
-    RepeatFind(merged_data, ml, output_path);
+    unsigned int ml = 100;
+    // 调用两个方法，可以注释掉一个
+    RepeatFind1(merged_data, ml, output_path);
+    RepeatFind2(merged_data, ml, output_path);
     
     end = clock();                                                                                       // 结束时间戳
     std::cout << "Total time consume: " << (double)(end - start) / CLOCKS_PER_SEC << "s" << std::endl; // 耗费的时间
